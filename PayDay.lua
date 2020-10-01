@@ -2,6 +2,8 @@
 -- Used https://github.com/Gethe/wow-ui-source/blob/2.4.3/AddOns/Blizzard_TimeManager/Blizzard_TimeManager.lua
 -- as a refernce.
 
+SLASH_PAYDAY1 = "/payday"
+
 local Settings = {
 
 }
@@ -48,3 +50,9 @@ function PayDayFrame_OnUpdate(self)
 		end
 	end
 end
+
+function PayDay_OnSlashCmd(msg, editBox)
+	PayDayFrame:Show()
+end
+
+SlashCmdList["PAYDAY"] = PayDay_OnSlashCmd
