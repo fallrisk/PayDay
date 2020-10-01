@@ -1,0 +1,9 @@
+## Interface: 20400
+## Title: Pay Day
+## Author: Justin Watson <jwatson5@gmail.com>
+## LoadOnDemand: 1
+## Version: 0.1.0
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## Notes: A great way to get all of Rat's money.
+PayDay.xml
