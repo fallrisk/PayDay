@@ -279,9 +279,84 @@ end
 -- Stats Class
 --------------
 
-Stats = {}
+local Stats = {}
+Stats.__index = Stats
 
+function Stats:New()
+	local o = {}
+	setmetatable(o, Stats)
+	-- this is the list of all gamblers and the amount the have lost or gained
+	-- negatives values is a loss and positive values is a gain
+	-- this is a net totals
+	o.totals = {}
+	o.totalMatches = 0
+	return o
+end
+
+function Stats:AddMatch(match)
+	-- add all the gamblers that aren't already in the stats
+	if match.phase ~= "complete" then return end
+	self.totalMatches = self.totalMatches + 1
+	for i, v in pairs(match:GetGamblers()) do
+		if self.totals[v] == nil then
+			self.totals[v] = 0
+		end
+	end
+	local diff = match.highRoll - match.lowRoll
+	self.totals[match.highGambler] = self.totals[match.highGambler] + diff
+	self.totals[match.lowGambler] = self.totals[match.lowGambler] - diff
+end
+
+function Stats:ToString()
+	-- find the largest gambler name, add X number of spaces after it
+	-- ensure that all of our values are placed out that far
+	local output = ""
+	for i, v in ipairs(self:GetGamblersSorted()) do
+		output = output..string.format("%15s %5d\n", v, self.totals[v])
+	end
+	return output
+end
+
+function Stats:GetGamblersSorted()
+	local sorted = {}
+	-- really simple shitty sort, find highest and put the name on the list
+	local copy = shallowcopy(self.totals)
+	-- I don't use the k,v this loops is ot just ensure we loop for the number of elements
+	for k, v in pairs(self.totals) do  
+		local highest = nil
+		local highestKey = nil
+		for kc, vc in pairs(copy) do
+			if highest == nil then
+				highest = vc
+				highestKey = kc
+			end
+			if vc > highest then
+				highest = vc
+				highestKey = kc
+			end
+		end
+		table.insert(sorted, highestKey)
+		copy[highestKey] = nil  -- remove
+	end
+	return sorted
+end
+
+function Stats:Print()
+	if self.totalMatches == 0 then
+		print("No matches submitted")
+		return
+	elseif self.totalMatches == 1 then
+		print("in 1 match:")
+	else
+		print(string.format("in %d matches:", self.totalMatches))
+	end
+	
+	for i, v in ipairs(self:GetGamblersSorted()) do
+		print(v, self.totals[v])
+	end
+end
 
 -- Module Exporting
 meowth = {}
 meowth.Match = Match
+meowth.Stats = Stats
