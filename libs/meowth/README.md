@@ -87,7 +87,7 @@ project and run `lua5.1 .\test_meowth.lua`.
 
 # Notes
 
-I followed the LUA style at https://github.com/Gethe/wow-ui-source/tree/live/AddOns.
+I followed the Lua style at https://github.com/Gethe/wow-ui-source/tree/live/AddOns.
 
 Indent with tabs, you can use any size since tab size is based on viewer/editor
 
