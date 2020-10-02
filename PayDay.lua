@@ -55,12 +55,12 @@ function PayDay_ParseChat(name, msg)
 	if not matchStarted then return end
 	if msg == "1" then
 		match:AddGambler(name)
-		if #match:GetGamblers() >= 1 then
+		if #match:GetGamblers() >= 2 then
 			PayDayFrameButtonStartRoll:Enable()
 		end
 	elseif msg == "-1" then
 		match:RemoveGambler(name)
-		if #match:GetGamblers() < 1 then
+		if #match:GetGamblers() < 2 then
 			PayDayFrameButtonStartRoll:Disable()
 		end
 	else
@@ -102,7 +102,7 @@ function PayDay_CheckComplete(prevPhase)
 	if match.phase == "complete" then
 		PrintChat("match complete")
 		local diff = match.highRoll - match.lowRoll
-		PrintChat(string.format("HOoO MAN! %s owes %d to %s", match.lowGambler, diff, match.highGambler))
+		PrintChat(string.format("HOoO MAN! %s owes %d gold to %s", match.lowGambler, diff, match.highGambler))
 		stats:AddMatch(match)
 		EndMatch()
 	end
