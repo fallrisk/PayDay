@@ -187,9 +187,6 @@
 		<Size>
 			<AbsDimension x="32" y="32"/>
 		</Size>
-		<Anchors>
-			<Anchor point="BOTTOMLEFT"/>
-		</Anchors>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture file="Interface\AddOns\PayDay\res\icon.tga">
@@ -218,9 +215,18 @@
 		</Layers>
 		<HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight"/>
 		<Scripts>
+			<OnLoad>
+				PayDayButtonMinimap_OnLoad(self);
+			</OnLoad>
 			<OnClick>
 				PayDayButtonMinimap_OnClick(self);
 			</OnClick>
+			<OnDragStart>
+				PayDayButtonMinimap_OnDragStart(self);
+			</OnDragStart>
+			<OnDragStop>
+				PayDayButtonMinimap_OnDragStop(self);
+			</OnDragStop>
 		</Scripts>
 	</Button>
 </Ui>

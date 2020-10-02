@@ -11,6 +11,7 @@ local matchStarted = false
 local maxRoll = false
 local minRoll = false
 local channelId = 2
+local minimapPos = 10
 
 -- PayDay AddOn
 
@@ -95,8 +96,89 @@ end
 
 -- PayDay Minimap
 
+function PayDayButtonMinimap_OnLoad(self)
+	self:RegisterForDrag('LeftButton')
+	self:SetFrameLevel(8)
+	PayDayButtonMinimap_SetPosition(minimapPos)
+end
+
 function PayDayButtonMinimap_OnClick(self)
 	PayDayFrame_Toggle()
+end
+
+function PayDayButtonMinimap_OnDragStart(self)
+	self.dragging = true
+	self:LockHighlight()
+	self:SetScript('OnUpdate', PayDayButtonMinimap_UpdatePosition)
+end
+
+function PayDayButtonMinimap_OnDragStop(self)
+	self.dragging = nil
+	self:SetScript('OnUpdate', nil)
+	self:UnlockHighlight()
+end
+
+function PayDayButtonMinimap_UpdatePosition(self)
+	-- Most of this came from minimap.lua in the Bongos addon.
+	local mx, my = Minimap:GetCenter()
+	local px, py = GetCursorPosition()
+	local scale = Minimap:GetEffectiveScale()
+	px, py = px / scale, py / scale
+	minimapPos = math.deg(math.atan2(py - my, px - mx)) % 360
+	local angle = math.rad(minimapPos)
+	local cos = math.cos(angle)
+	local sin = math.sin(angle)
+	local minimapShape = GetMinimapShape and GetMinimapShape() or 'ROUND'
+
+	local round = false
+	if minimapShape == 'ROUND' then
+		round = true
+	elseif minimapShape == 'SQUARE' then
+		round = false
+	elseif minimapShape == 'CORNER-TOPRIGHT' then
+		round = not(cos < 0 or sin < 0)
+	elseif minimapShape == 'CORNER-TOPLEFT' then
+		round = not(cos > 0 or sin < 0)
+	elseif minimapShape == 'CORNER-BOTTOMRIGHT' then
+		round = not(cos < 0 or sin > 0)
+	elseif minimapShape == 'CORNER-BOTTOMLEFT' then
+		round = not(cos > 0 or sin > 0)
+	elseif minimapShape == 'SIDE-LEFT' then
+		round = cos <= 0
+	elseif minimapShape == 'SIDE-RIGHT' then
+		round = cos >= 0
+	elseif minimapShape == 'SIDE-TOP' then
+		round = sin <= 0
+	elseif minimapShape == 'SIDE-BOTTOM' then
+		round = sin >= 0
+	elseif minimapShape == 'TRICORNER-TOPRIGHT' then
+		round = not(cos < 0 and sin > 0)
+	elseif minimapShape == 'TRICORNER-TOPLEFT' then
+		round = not(cos > 0 and sin > 0)
+	elseif minimapShape == 'TRICORNER-BOTTOMRIGHT' then
+		round = not(cos < 0 and sin < 0)
+	elseif minimapShape == 'TRICORNER-BOTTOMLEFT' then
+		round = not(cos > 0 and sin < 0)
+	end
+
+	local x, y
+	if round then
+		x = cos*80
+		y = sin*80
+	else
+		x = math.max(-82, math.min(110*cos, 84))
+		y = math.max(-86, math.min(110*sin, 82))
+	end
+
+	self:SetPoint('CENTER', x, y)
+end
+
+function PayDayButtonMinimap_SetPosition(angle)
+	local cos = math.cos(angle)
+	local sin = math.sin(angle)
+	local x = cos*80
+	local y = sin*80
+	PayDayButtonMinimap:SetPoint('CENTER', x, y)
 end
 
 -- PayDayFrame
