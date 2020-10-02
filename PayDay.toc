@@ -1,6 +1,6 @@
 ## Interface: 20400
 ## Title: Pay Day
-## Author: Justin Watson <jwatson5@gmail.com>
+## Author: Justin Watson
 ## LoadOnDemand: 1
 ## Version: 2020.1
 ## DefaultState: Enabled

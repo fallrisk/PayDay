@@ -87,10 +87,16 @@ function PayDay_CheckComplete()
 	elseif match.phase == "complete" then
 		PrintChat("match complete")
 		local diff = match.highRoll - match.lowRoll
-		PrintChat(string.format("%s owes %d to %s", match.lowGambler, diff, match.highGambler))
+		PrintChat(string.format("HO MAN! %s owes %d to %s", match.lowGambler, diff, match.highGambler))
 		stats:AddMatch(match)
 		EndMatch()
 	end
+end
+
+-- PayDay Minimap
+
+function PayDayButtonMinimap_OnClick(self)
+	PayDayFrame_Toggle()
 end
 
 -- PayDayFrame
@@ -105,7 +111,7 @@ function PayDayFrame_OnLoad(self)
 	PayDayFrameButtonResetStats:Disable()
 	PayDayFrameButtonReminder:Disable()
 	PayDayFrameButtonLastCall:Disable()
-	PayDayFrameEditBoxMaxRoll:SetText("100")
+	PayDayFrameEditBoxMaxRoll:SetText("50")
 	PayDayFrameEditBoxMinRoll:SetText("1")
 end
 
@@ -188,6 +194,7 @@ function PayDayFrameButtonStartMatch_OnClick(self)
 	local min = tonumber(PayDayFrameEditBoxMinRoll:GetText())
 	if max == nil or min == nil then return end
 	if min >= max then return end
+	PlaySoundFile("Interface\\AddOns\\PayDay\\res\\lion1.ogg", "Master")
 	match = meowth.Match:New()
 	maxRoll = max
 	minRoll = min
