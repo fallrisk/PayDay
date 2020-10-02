@@ -80,15 +80,29 @@ function PayDay_ParseRoll(msg)
 	match:AddRoll(name, roll)
 end
 
-function PayDay_CheckComplete()
-	if match.phase == "high tie" then
-		PrintChat("there is a high tie!")
-	elseif match.phase == "low tie" then
-		PrintChat("there is a low tie!")
-	elseif match.phase == "complete" then
+function PayDay_CheckComplete(prevPhase)
+	if prevPhase == "roll" then
+		if match.phase == "high tie" then
+			PrintChat("there is a high tie!")
+		elseif match.phase == "low tie" then
+			PrintChat("there is a low tie!")
+		end
+	elseif prevPhase == "high tie" and #match:GetWaitingList() == 0 then
+		if match.phase == "high tie" then
+			PrintChat("we got another high tie!")
+		elseif match.phase == "low tie" then
+			PrintChat("there is a low tie!")
+		end
+	elseif prevPhase == "low tie" and #match:GetWaitingList() == 0 then
+		if match.phae == "low tie" then
+			PrintChat("we got another low tie!")
+		end
+	end
+
+	if match.phase == "complete" then
 		PrintChat("match complete")
 		local diff = match.highRoll - match.lowRoll
-		PrintChat(string.format("HO MAN! %s owes %d to %s", match.lowGambler, diff, match.highGambler))
+		PrintChat(string.format("HOoO MAN! %s owes %d to %s", match.lowGambler, diff, match.highGambler))
 		stats:AddMatch(match)
 		EndMatch()
 	end
@@ -220,8 +234,9 @@ function PayDayFrame_OnEvent(self, event, ...)
 		PayDay_ParseChat(name, msg)
 	elseif event == "CHAT_MSG_SYSTEM" then
 		local msg = ...
+		local prevPhase = match.phase
 		PayDay_ParseRoll(tostring(msg))
-		PayDay_CheckComplete()
+		PayDay_CheckComplete(prevPhase)
 	end
 end
 
