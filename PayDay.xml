@@ -40,7 +40,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<EditBox name="$parentEditBoxMaxRoll" inherits="InputBoxTemplate" autoFocus="false" letters="8" text="100" numeric="true">
+			<EditBox name="$parentEditBoxMaxRoll" inherits="InputBoxTemplate" autoFocus="false" letters="8" numeric="true">
 				<Size x="80" y="26"/>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -48,7 +48,7 @@
 					</Anchor>
 				</Anchors>
 			</EditBox>
-			<EditBox name="$parentEditBoxMinRoll" inherits="InputBoxTemplate" autoFocus="false" letters="8" text="1" numeric="true">
+			<EditBox name="$parentEditBoxMinRoll" inherits="InputBoxTemplate" autoFocus="false" letters="8" numeric="true">
 				<Size x="80" y="26"/>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -119,6 +119,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
+						PayDayFrameButtonPrintStats_OnClick(self);
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -133,11 +134,12 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
+						PayDayFrameButtonResetStats_OnClick(self);
 					</OnClick>
 				</Scripts>
 			</Button>
 
-			<Button name="$parentButtonRemaining" text="Remaining" inherits="UIPanelButtonTemplate">
+			<Button name="$parentButtonReminder" text="Remind Ppl" inherits="UIPanelButtonTemplate">
 				<Size>
 					<AbsDimension x="88" y="22"/>
 				</Size>
@@ -148,7 +150,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						PayDayFrameButtonEndMatch_OnClick(self);
+						PayDayFrameButtonReminder_OnClick(self);
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -163,7 +165,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						PayDayFrameButtonEndMatch_OnClick(self);
+						PayDayFrameButtonLastCall_OnClick(self);
 					</OnClick>
 				</Scripts>
 			</Button>

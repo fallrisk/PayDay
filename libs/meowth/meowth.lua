@@ -105,7 +105,7 @@ function Match:AddRoll(name, roll)
 		end
 	elseif self.phase == "low tie" then
 		if self.lowTieGamblers[name] == nil then return end
-		self.lowTieGamblers[name] = roll		
+		self.lowTieGamblers[name] = roll
 		if #self:GetWaitingList() == 0 then
 			if self:_IsLowTie(self.lowTieGamblers) then
 				self.phase = "low tie"  -- repeating low ties
@@ -174,7 +174,7 @@ function Match:_IsHighTie(tab)
 		self.highTieGamblers = highTieGamblers
 		if self.highRoll == nil then
 			self.highRoll = high
-		end		
+		end
 		-- print("there is a high tie")
 		return true
 	end
@@ -217,7 +217,7 @@ function Match:_IsLowTie(tab)
 		self.lowTieGamblers = lowTieGamblers
 		if self.lowRoll == nil then
 			self.lowRoll = low
-		end		
+		end
 		-- print("there is a low tie")
 		return true
 	end
@@ -322,7 +322,7 @@ function Stats:GetGamblersSorted()
 	-- really simple shitty sort, find highest and put the name on the list
 	local copy = shallowcopy(self.totals)
 	-- I don't use the k,v this loops is ot just ensure we loop for the number of elements
-	for k, v in pairs(self.totals) do  
+	for k, v in pairs(self.totals) do
 		local highest = nil
 		local highestKey = nil
 		for kc, vc in pairs(copy) do
@@ -350,7 +350,7 @@ function Stats:Print()
 	else
 		print(string.format("in %d matches:", self.totalMatches))
 	end
-	
+
 	for i, v in ipairs(self:GetGamblersSorted()) do
 		print(v, self.totals[v])
 	end
