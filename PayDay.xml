@@ -4,7 +4,7 @@
 	<Script file="PayDay.lua" />
 	<Frame name="PayDayFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="false" clampedToScreen="true">
 		<Size>
-			<AbsDimension x="200" y="136" />
+			<AbsDimension x="200" y="166" />
 		</Size>
 		<TitleRegion>
 			<Size x="180" y="20"/>
@@ -27,6 +27,19 @@
 			</EdgeSize>
 		</Backdrop>
 		<Frames>
+			<Button name="$parentCloseButton" inherits="UIPanelCloseButton">
+				<Size x="20" y="20"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+						<Offset x="0" y="0"/>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						PayDayFrameCloseButton_OnClick();
+					</OnClick>
+				</Scripts>
+			</Button>
 			<EditBox name="$parentEditBoxMaxRoll" inherits="InputBoxTemplate" autoFocus="false" letters="8" text="100" numeric="true">
 				<Size x="80" y="26"/>
 				<Anchors>
@@ -52,6 +65,11 @@
 						<Offset x="10" y="-44" />
 					</Anchor>
 				</Anchors>
+				<Scripts>
+					<OnClick>
+						PayDayFrameButtonStartMatch_OnClick(self);
+					</OnClick>
+				</Scripts>
 			</Button>
 			<Frame name="PayDayFrameDropDownChannel" inherits="UIDropDownMenuTemplate">
 				<Anchors>
@@ -69,6 +87,11 @@
 						<Offset x="10" y="-70" />
 					</Anchor>
 				</Anchors>
+				<Scripts>
+					<OnClick>
+						PayDayFrameButtonStartRoll_OnClick(self);
+					</OnClick>
+				</Scripts>
 			</Button>
 			<Button name="$parentButtonEndMatch" text="End Match" inherits="UIPanelButtonTemplate">
 				<Size>
@@ -79,6 +102,11 @@
 						<Offset x="100" y="-70" />
 					</Anchor>
 				</Anchors>
+				<Scripts>
+					<OnClick>
+						PayDayFrameButtonEndMatch_OnClick(self);
+					</OnClick>
+				</Scripts>
 			</Button>
 			<Button name="$parentButtonPrintStats" text="Print Stats" inherits="UIPanelButtonTemplate">
 				<Size>
@@ -89,6 +117,10 @@
 						<Offset x="10" y="-94" />
 					</Anchor>
 				</Anchors>
+				<Scripts>
+					<OnClick>
+					</OnClick>
+				</Scripts>
 			</Button>
 			<Button name="$parentButtonResetStats" text="Reset Stats" inherits="UIPanelButtonTemplate">
 				<Size>
@@ -99,6 +131,41 @@
 						<Offset x="100" y="-94" />
 					</Anchor>
 				</Anchors>
+				<Scripts>
+					<OnClick>
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Button name="$parentButtonRemaining" text="Remaining" inherits="UIPanelButtonTemplate">
+				<Size>
+					<AbsDimension x="88" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="10" y="-118" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						PayDayFrameButtonEndMatch_OnClick(self);
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentButtonLastCall" text="Last Call" inherits="UIPanelButtonTemplate">
+				<Size>
+					<AbsDimension x="88" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="100" y="-118" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						PayDayFrameButtonEndMatch_OnClick(self);
+					</OnClick>
+				</Scripts>
 			</Button>
 		</Frames>
 		<Scripts>
@@ -109,6 +176,9 @@
 			<OnUpdate>
 				PayDayFrame_OnUpdate(self);
 			</OnUpdate>
+			<OnEvent>
+				PayDayFrame_OnEvent(self, event, ...);
+			</OnEvent>
 		</Scripts>
 	</Frame>
 </Ui>
