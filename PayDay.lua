@@ -12,16 +12,18 @@ local maxRoll = false
 local minRoll = false
 local channelId = 2
 local minimapPos = 10
+local drRunAway = 1
 
 -- PayDay AddOn
 
 function PrintChat(msg)
+	local header = "[PD] "
 	if channelId == 1 then
-		SendChatMessage(msg, "SAY", nil, GetChannelName("SAY"))
+		SendChatMessage(header..msg, "SAY", nil, GetChannelName("SAY"))
 	elseif channelId == 2 then
-		SendChatMessage(msg, "PARTY", nil, GetChannelName("PARTY"))
+		SendChatMessage(header..msg, "PARTY", nil, GetChannelName("PARTY"))
 	elseif channelId == 3 then
-		SendChatMessage(msg, "RAID", nil, GetChannelName("RAID"))
+		SendChatMessage(header..msg, "RAID", nil, GetChannelName("RAID"))
 	end
 end
 
@@ -41,6 +43,12 @@ function EndMatch()
 	PayDayFrameButtonStartMatch:Enable()
 end
 
+function PrintTieMembers()
+	PrintChat("The following gamblers need to roll again:")
+	for i, v in ipairs(match:GetWaitingList()) do
+		PrintChat(v)
+	end
+end
 
 function PayDay_OnLoad()
 	local version = GetAddOnMetadata("PayDay", "version")
@@ -48,7 +56,28 @@ function PayDay_OnLoad()
 end
 
 function PayDay_OnSlashCmd(msg, editBox)
-	PayDayFrame:Show()
+	if msg == "dj" then  -- debug join
+		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Squirtle")
+		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Charmander")
+		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Bulbasaur")
+	elseif msg == "dr" then  -- debug roll
+		if drRunAway > 20 then
+			return
+		end
+		drRunAway = drRunAway + 1
+		local sRoll = string.format("Squirtle rolls %d (%d-%d)", random(minRoll, maxRoll), minRoll, maxRoll)
+		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", sRoll)
+
+		local cRoll = string.format("Charmander rolls %d (%d-%d)", random(minRoll, maxRoll), minRoll, maxRoll)
+		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", cRoll)
+
+		local bRoll = string.format("Bulbasaur rolls %d (%d-%d)", random(minRoll, maxRoll), minRoll, maxRoll)
+		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", bRoll)
+		-- combined to reduce number of messages to server otherwise I get muted
+		SELECTED_CHAT_FRAME:AddMessage(string.format("%s, %s, %s", sRoll, cRoll, bRoll))
+	else
+		PayDayFrame:Show()
+	end
 end
 
 function PayDay_ParseChat(name, msg)
@@ -69,7 +98,7 @@ function PayDay_ParseChat(name, msg)
 end
 
 function PayDay_ParseRoll(msg)
-	if not (match.phase == "roll" or match.phase == "high tie" or match.phae == "low tie") then
+	if not (match.phase == "roll" or match.phase == "high tie" or match.phase == "low tie") then
 		return
 	end
 	local i, j = string.find(msg, "rolls")
@@ -83,26 +112,35 @@ end
 function PayDay_CheckComplete(prevPhase)
 	if prevPhase == "roll" then
 		if match.phase == "high tie" then
-			PrintChat("there is a high tie!")
+			PrintChat("There is a high tie!")
+			-- PrintTieMembers()
 		elseif match.phase == "low tie" then
-			PrintChat("there is a low tie!")
+			PrintChat("There is a low tie!")
+			-- PrintTieMembers()
+		elseif match.phase == "all match" then
+			PrintChat("We got ourselves a standoff, ffs. Everybody roll again.")
+			a:Reroll()
 		end
-	elseif prevPhase == "high tie" and #match:GetWaitingList() == 0 then
+	elseif prevPhase == "high tie" and match.phase ~= "complete" and #match:GetWaitingList() == 0 then
+		-- without the check to GetWaitingList you end up getting into this area multiple times
 		if match.phase == "high tie" then
-			PrintChat("we got another high tie!")
+			PrintChat("We got another high tie!")
+			-- PrintTieMembers()
 		elseif match.phase == "low tie" then
-			PrintChat("there is a low tie!")
+			PrintChat("There is also a low tie!")
+			-- PrintTieMembers()
 		end
-	elseif prevPhase == "low tie" and #match:GetWaitingList() == 0 then
-		if match.phae == "low tie" then
-			PrintChat("we got another low tie!")
+	elseif prevPhase == "low tie" and match.phase ~= "complete" and #match:GetWaitingList() == 0 then
+		if match.phase == "low tie" then
+			PrintChat("We got another low tie!")
+			-- PrintTieMembers()
 		end
 	end
 
 	if match.phase == "complete" then
-		PrintChat("match complete")
+		PrintChat("Match complete.")
 		local diff = match.highRoll - match.lowRoll
-		PrintChat(string.format("HOoO MAN! %s owes %d gold to %s", match.lowGambler, diff, match.highGambler))
+		PrintChat(string.format("HOoO MAN! %s owes %d gold to %s!", match.lowGambler, diff, match.highGambler))
 		stats:AddMatch(match)
 		EndMatch()
 	end
@@ -295,8 +333,8 @@ function PayDayFrameButtonStartMatch_OnClick(self)
 	match = meowth.Match:New()
 	maxRoll = max
 	minRoll = min
-	PrintChat(string.format("rolling from %d to %d", min, max))
-	PrintChat("type 1 to join or -1 to leave")
+	PrintChat(string.format("Rolling from %d to %d.", min, max))
+	PrintChat("Type 1 to join or -1 to leave.")
 
 	if channelId == 1 then
 		PayDayFrame:RegisterEvent("CHAT_MSG_SAY")
@@ -317,7 +355,7 @@ end
 
 function PayDayFrameButtonEndMatch_OnClick(self)
 	if not matchStarted then return end
-	PrintChat("ending this match")
+	PrintChat("Ending this match.")
 	EndMatch()
 end
 
@@ -328,7 +366,7 @@ function PayDayFrameButtonStartRoll_OnClick(self)
 	PayDayFrameButtonStartRoll:Disable()
 	PayDayFrameButtonReminder:Enable()
 	PayDayFrameButtonLastCall:Disable()
-	PrintChat("we rollin!")
+	PrintChat(string.format("We rollin (%d to %d)!", minRoll, maxRoll))
 end
 
 function PayDayFrameButtonPrintStats_OnClick(self)
@@ -339,7 +377,7 @@ end
 
 function PayDayFrameButtonResetStats_OnClick()
 	if matchStarted then return end
-	SELECTED_CHAT_FRAME:AddMessage("resetting stats")
+	SELECTED_CHAT_FRAME:AddMessage("Resetting statistics.")
 	PayDayFrameButtonPrintStats:Disable()
 	PayDayFrameButtonResetStats:Disable()
 	stats = meowth.Stats:New()
@@ -347,7 +385,7 @@ end
 
 function PayDayFrameButtonReminder_OnClick(self)
 	if not matchStarted then return end
-	PrintChat('heads up! we are waiting on:')
+	PrintChat('Heads up! We are waiting on:')
 	for i, v in ipairs(match:GetWaitingList()) do
 		PrintChat(v)
 	end
@@ -356,7 +394,7 @@ end
 function PayDayFrameButtonLastCall_OnClick(self)
 	if not matchStarted then return end
 	if match.phase ~= "join" then return end
-	PrintChat("last call to join honkies")
+	PrintChat("Last call to join honkies.")
 end
 
 SlashCmdList["PAYDAY"] = PayDay_OnSlashCmd

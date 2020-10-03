@@ -82,7 +82,9 @@ function Match:AddRoll(name, roll)
 		if self.gamblers[name] == nil then return end
 		self.gamblers[name] = roll
 		if #self:GetWaitingList() == 0 then
-			if self:_IsHighTie(self.gamblers) then
+			if self:_AllSame(self.gamblers) then
+				self.phase = "all match"
+			elseif self:_IsHighTie(self.gamblers) then
 				self.phase = "high tie"
 			elseif self:_IsLowTie(self.gamblers) then
 				self.phase = "low tie"
@@ -118,6 +120,15 @@ function Match:AddRoll(name, roll)
 	end
 end
 
+function Match:Reroll()
+	if self.phase == "all match" then
+		for k, v in pairs(self.gamblers) do
+			self.gamblers[k] = true
+		end
+		self.phase = "roll"
+	end
+end
+
 function Match:GetWaitingList()
 	if not HasValue(self.phase, {"roll", "high tie", "low tie"}) then return nil end
 	local waitList = {}
@@ -142,6 +153,15 @@ function Match:GetWaitingList()
 	end
 
 	return waitList
+end
+
+function Match:_AllSame(tab)
+	local tabCopy = shallowcopy(tab)
+	local xk, xv = next(tabCopy)
+	for k, v in pairs(tabCopy) do
+		if xv ~= v then return false end
+	end
+	return true
 end
 
 function Match:_IsHighTie(tab)
