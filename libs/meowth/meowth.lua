@@ -378,6 +378,16 @@ function Stats:GetGamblersSorted()
 	return sorted
 end
 
+function Stats:GetGamblersSortedbyName()
+	local sorted = {}
+	local copy = shallowcopy(self.totals)
+	for k, v in pairs(self.totals) do
+		table.insert(sorted, k)
+	end
+	table.sort(sorted)
+	return sorted
+end
+
 function Stats:Print()
 	if self.totalMatches == 0 then
 		print("No matches submitted")

@@ -121,7 +121,7 @@ function PayDay_CheckComplete(prevPhase, prevWaitCount)
 			PrintTieMembers()
 		elseif match.phase == "all match" then
 			PrintChat("We got ourselves a standoff, ffs. Everybody roll again.")
-			a:Reroll()
+			match:Reroll()
 		end
 	elseif prevPhase == "high tie" and match.phase ~= "complete"
 		   and prevWaitCount - 1 ~= #match:GetWaitingList() then
@@ -250,6 +250,7 @@ function PayDayFrame_OnLoad(self)
 	PayDayFrameButtonLastCall:Disable()
 	PayDayFrameEditBoxMaxRoll:SetText("50")
 	PayDayFrameEditBoxMinRoll:SetText("1")
+	PayDayFrameButtonPrintStats:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 end
 
 function PayDayFrame_OnUpdate(self)
@@ -375,31 +376,45 @@ function PayDayFrameButtonStartRoll_OnClick(self)
 	PrintChat(string.format("We rollin (%d to %d)!", minRoll, maxRoll))
 end
 
-function PayDayFrameButtonPrintStats_OnClick(self, topAndBottom)
+function PayDayFrameButtonPrintStats_OnClick(self, button, down)
 	-- top and bottom is how many of the top you want to display
 	-- and how many of the bottom you want to display. -1 means all
-	local count = #stats:GetGamblersSorted()
-	local topAndBottom = topAndBottom or 3
-	local top = 0
-	local bot = 0
-	PrintChat("Statistics")
-	if topAndBottom == -1 then
-		for i, v in ipairs(stats:GetGamblersSorted()) do
-			PrintChat(string.format("%s %d", v, stats.totals[v]))
-		end
-	else
-		for i, v in ipairs(stats:GetGamblersSorted()) do
-			if top < topAndBottom then
-				top = top + 1
-				PrintChat(string.format("%s %d", v, stats.totals[v]))
-			elseif top == topAndBottom and bot == 0 and count > 2 * topAndBottom then
-				PrintChat("...")
-				top = top + 1
-			elseif top >= topAndBottom and bot < topAndBottom and i > count - topAndBottom then
-				bot = bot + 1
+	if button == "LeftButton" then
+		local count = #stats:GetGamblersSorted()
+		local topAndBottom = 3
+		local top = 0
+		local bot = 0
+		PrintChat("Statistics")
+		if topAndBottom == -1 then
+			for i, v in ipairs(stats:GetGamblersSorted()) do
 				PrintChat(string.format("%s %d", v, stats.totals[v]))
 			end
+		else
+			for i, v in ipairs(stats:GetGamblersSorted()) do
+				if top < topAndBottom then
+					top = top + 1
+					PrintChat(string.format("%s %d", v, stats.totals[v]))
+				elseif top == topAndBottom and bot == 0 and count > 2 * topAndBottom then
+					PrintChat("...")
+					top = top + 1
+				elseif top >= topAndBottom and bot < topAndBottom and i > count - topAndBottom then
+					bot = bot + 1
+					PrintChat(string.format("%s %d", v, stats.totals[v]))
+				end
+			end
 		end
+	else
+		local menu = {
+			{text = "Select a Gambler", isTitle = true}
+		}
+		for i, v in ipairs(stats:GetGamblersSortedbyName()) do
+			table.insert(menu, {text = v, func = function()
+				PrintChat(string.format("%s %d", v, stats.totals[v]))
+			end
+			})
+		end
+		local menuFrame = CreateFrame("Frame", "GamberStatsSelectFrame", UIParent, "UIDropDownMenuTemplate")
+		EasyMenu(menu, menuFrame, "cursor", 0 , 0, "MENU")
 	end
 end
 

@@ -119,7 +119,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						PayDayFrameButtonPrintStats_OnClick(self);
+						PayDayFrameButtonPrintStats_OnClick(self, button, down);
 					</OnClick>
 				</Scripts>
 			</Button>
