@@ -375,9 +375,31 @@ function PayDayFrameButtonStartRoll_OnClick(self)
 	PrintChat(string.format("We rollin (%d to %d)!", minRoll, maxRoll))
 end
 
-function PayDayFrameButtonPrintStats_OnClick(self)
-	for i, v in ipairs(stats:GetGamblersSorted()) do
-		PrintChat(string.format("%s %d", v, stats.totals[v]))
+function PayDayFrameButtonPrintStats_OnClick(self, topAndBottom)
+	-- top and bottom is how many of the top you want to display
+	-- and how many of the bottom you want to display. -1 means all
+	local count = #stats:GetGamblersSorted()
+	local topAndBottom = topAndBottom or 3
+	local top = 0
+	local bot = 0
+	PrintChat("Statistics")
+	if topAndBottom == -1 then
+		for i, v in ipairs(stats:GetGamblersSorted()) do
+			PrintChat(string.format("%s %d", v, stats.totals[v]))
+		end
+	else
+		for i, v in ipairs(stats:GetGamblersSorted()) do
+			if top < topAndBottom then
+				top = top + 1
+				PrintChat(string.format("%s %d", v, stats.totals[v]))
+			elseif top == topAndBottom and bot == 0 and count > 2 * topAndBottom then
+				PrintChat("...")
+				top = top + 1
+			elseif top >= topAndBottom and bot < topAndBottom and i > count - topAndBottom then
+				bot = bot + 1
+				PrintChat(string.format("%s %d", v, stats.totals[v]))
+			end
+		end
 	end
 end
 
