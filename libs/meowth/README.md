@@ -55,19 +55,20 @@ the function will return true and will go to the "roll phase".
 
 ## Match Stats
 
-* high_roll: The high gambler's roll.
-* high_roll_gambler: The gambler who rolled the highest.
-* low_roll: The low gambler's roll.
-* low_roll_gambler: The gambler who rolled the lowest.
-* roll_difference: The difference between the high_roll and the low_roll.
+* highRoll: The high gambler's roll.
+* highGambler: The gambler who rolled the highest.
+* lowRoll: The low gambler's roll.
+* lowGambler: The gambler who rolled the lowest.
 
 # Stats
 
 A `stats` object is statistics for a collection of matches. It is a running
 statistics class. At the end of each match your match data can be submitted to
-a stats object to keep a running total of information across a serveral
-matches. You should create a stats before you start your first match. That way
-at any point you can get statistics for the matches.
+a stats object to keep a running total of information across serveral matches.
+You should create a stats object before you start your first match. That way
+at any point you can get statistics for the matches. The main function is
+`GetGamblersSorted`, which returns an array (a table with numerical indices)
+of the gambler's sorted from most won (key 1) to most loss (key N).
 
 # Testing
 
