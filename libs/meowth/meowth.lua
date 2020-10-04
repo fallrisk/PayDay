@@ -75,12 +75,19 @@ function Match:Start()
 end
 
 function Match:AddRoll(name, roll)
+	-- return a boolean indicating if the roll was used or dropped
+	local rollUsed = false
 	if self.phase == "roll" then
-		if self.phase ~= "roll" then return end
-		if roll < self.minRoll then return end
-		if roll > self.maxRoll then return end
-		if self.gamblers[name] == nil then return end
-		self.gamblers[name] = roll
+		if self.phase ~= "roll" then return false end
+		if roll < self.minRoll then return false end
+		if roll > self.maxRoll then return false end
+		if self.gamblers[name] == nil then return false end
+		if type(self.gamblers[name]) == "boolean" then
+			self.gamblers[name] = roll
+			rollUsed = true
+		else
+			return false
+		end
 		if #self:GetWaitingList() == 0 then
 			if self:_AllSame(self.gamblers) then
 				self.phase = "all match"
@@ -93,12 +100,16 @@ function Match:AddRoll(name, roll)
 			end
 		end
 	elseif self.phase == "high tie" then
-		if self.highTieGamblers[name] == nil then return end
-		self.highTieGamblers[name] = roll
+		if self.highTieGamblers[name] == nil then return false end
+		if type(self.highTieGamblers[name]) == "boolean" then
+			self.highTieGamblers[name] = roll
+			rollUsed = true
+		else
+			return false
+		end
 		if #self:GetWaitingList() == 0 then
 			if self:_IsHighTie(self.highTieGamblers) then
 				self.phase = "high tie"  -- repeating high ties
-				-- print("there is still a high tie")
 			elseif self:_IsLowTie(self.gamblers) then
 				self.phase = "low tie"
 			else
@@ -106,8 +117,13 @@ function Match:AddRoll(name, roll)
 			end
 		end
 	elseif self.phase == "low tie" then
-		if self.lowTieGamblers[name] == nil then return end
-		self.lowTieGamblers[name] = roll
+		if self.lowTieGamblers[name] == nil then return false end
+		if type(self.lowTieGamblers[name]) == "boolean" then
+			self.lowTieGamblers[name] = roll
+			rollUsed = true
+		else
+			return false
+		end
 		if #self:GetWaitingList() == 0 then
 			if self:_IsLowTie(self.lowTieGamblers) then
 				self.phase = "low tie"  -- repeating low ties
@@ -116,8 +132,9 @@ function Match:AddRoll(name, roll)
 			end
 		end
 	else
-		return
+		return false
 	end
+	return rollUsed
 end
 
 function Match:Reroll()
@@ -130,7 +147,7 @@ function Match:Reroll()
 end
 
 function Match:GetWaitingList()
-	if not HasValue(self.phase, {"roll", "high tie", "low tie"}) then return nil end
+	if not HasValue(self.phase, {"roll", "high tie", "low tie"}) then return 0 end
 	local waitList = {}
 	if self.phase == "roll" then
 		for k in pairs(self.gamblers) do

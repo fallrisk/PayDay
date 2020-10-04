@@ -12,7 +12,6 @@ local maxRoll = false
 local minRoll = false
 local channelId = 2
 local minimapPos = 10
-local drRunAway = 1
 
 -- PayDay AddOn
 
@@ -30,8 +29,6 @@ end
 function EndMatch()
 	matchStarted = false
 	match = false
-	maxRoll = false
-	minRoll = false
 	PayDayFrame:UnregisterEvent("CHAT_MSG_SAY")
 	PayDayFrame:UnregisterEvent("CHAT_MSG_PARTY")
 	PayDayFrame:UnregisterEvent("CHAT_MSG_RAID")
@@ -45,8 +42,12 @@ end
 
 function PrintTieMembers()
 	PrintChat("The following gamblers need to roll again:")
+	local m = ""
 	for i, v in ipairs(match:GetWaitingList()) do
-		PrintChat(v)
+		m = m..v..", "
+	end
+	if string.len(m) > 1 then
+		PrintChat(string.sub(m, 1, string.len(m) - 2))
 	end
 end
 
@@ -60,11 +61,8 @@ function PayDay_OnSlashCmd(msg, editBox)
 		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Squirtle")
 		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Charmander")
 		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Bulbasaur")
+		SELECTED_CHAT_FRAME:AddMessage("Squirtle, Charmander, and Bulbasaur joined the match")
 	elseif msg == "dr" then  -- debug roll
-		if drRunAway > 20 then
-			return
-		end
-		drRunAway = drRunAway + 1
 		local sRoll = string.format("Squirtle rolls %d (%d-%d)", random(minRoll, maxRoll), minRoll, maxRoll)
 		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", sRoll)
 
@@ -98,42 +96,47 @@ function PayDay_ParseChat(name, msg)
 end
 
 function PayDay_ParseRoll(msg)
+	-- returns true if the roll was used, false if it was dropped
 	if not (match.phase == "roll" or match.phase == "high tie" or match.phase == "low tie") then
-		return
+		return false
 	end
 	local i, j = string.find(msg, "rolls")
-	if i == nil then return end
+	if i == nil then return false end
 	local name, rolls, mins, maxs = string.match(msg, "^(%w+)%srolls%s(%d+)%s%((%d+)-(%d+)%)")
 	local roll, min, max = tonumber(rolls), tonumber(mins), tonumber(maxs)
-	if min ~= minRoll or max ~= maxRoll then return end
-	match:AddRoll(name, roll)
+	if min ~= minRoll or max ~= maxRoll then return false end
+	return match:AddRoll(name, roll)
 end
 
-function PayDay_CheckComplete(prevPhase)
+function PayDay_CheckComplete(prevPhase, prevWaitCount)
+	if prevWaitCount == nil then
+		prevWaitCount = 0
+	end
 	if prevPhase == "roll" then
 		if match.phase == "high tie" then
 			PrintChat("There is a high tie!")
-			-- PrintTieMembers()
+			PrintTieMembers()
 		elseif match.phase == "low tie" then
 			PrintChat("There is a low tie!")
-			-- PrintTieMembers()
+			PrintTieMembers()
 		elseif match.phase == "all match" then
 			PrintChat("We got ourselves a standoff, ffs. Everybody roll again.")
 			a:Reroll()
 		end
-	elseif prevPhase == "high tie" and match.phase ~= "complete" and #match:GetWaitingList() == 0 then
-		-- without the check to GetWaitingList you end up getting into this area multiple times
+	elseif prevPhase == "high tie" and match.phase ~= "complete"
+		   and prevWaitCount - 1 ~= #match:GetWaitingList() then
 		if match.phase == "high tie" then
 			PrintChat("We got another high tie!")
-			-- PrintTieMembers()
+			PrintTieMembers()
 		elseif match.phase == "low tie" then
 			PrintChat("There is also a low tie!")
-			-- PrintTieMembers()
+			PrintTieMembers()
 		end
-	elseif prevPhase == "low tie" and match.phase ~= "complete" and #match:GetWaitingList() == 0 then
+	elseif prevPhase == "low tie" and match.phase ~= "complete"
+		   and prevWaitCount - 1 ~= #match:GetWaitingList() then
 		if match.phase == "low tie" then
 			PrintChat("We got another low tie!")
-			-- PrintTieMembers()
+			PrintTieMembers()
 		end
 	end
 
@@ -272,9 +275,12 @@ function PayDayFrame_OnEvent(self, event, ...)
 		PayDay_ParseChat(name, msg)
 	elseif event == "CHAT_MSG_SYSTEM" then
 		local msg = ...
+		if match.phase == "join" then return end
 		local prevPhase = match.phase
-		PayDay_ParseRoll(tostring(msg))
-		PayDay_CheckComplete(prevPhase)
+		local prevWaitCount = #match:GetWaitingList()
+		if PayDay_ParseRoll(tostring(msg)) then
+			PayDay_CheckComplete(prevPhase, prevWaitCount)
+		end
 	end
 end
 
@@ -386,9 +392,7 @@ end
 function PayDayFrameButtonReminder_OnClick(self)
 	if not matchStarted then return end
 	PrintChat('Heads up! We are waiting on:')
-	for i, v in ipairs(match:GetWaitingList()) do
-		PrintChat(v)
-	end
+	PrintTieMembers()
 end
 
 function PayDayFrameButtonLastCall_OnClick(self)
