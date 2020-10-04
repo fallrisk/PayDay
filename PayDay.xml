@@ -2,7 +2,7 @@
 ..\..\FrameXML\UI.xsd">
 	<Script file="libs\meowth\meowth.lua" />
 	<Script file="PayDay.lua" />
-	<Frame name="PayDayFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="false" clampedToScreen="true">
+	<Frame name="PayDayFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" clampedToScreen="true">
 		<Size>
 			<AbsDimension x="200" y="166" />
 		</Size>

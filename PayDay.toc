@@ -2,7 +2,7 @@
 ## Title: Pay Day
 ## Author: Justin Watson
 ## LoadOnDemand: 1
-## Version: 2020.1
+## Version: 2020.1-beta
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## Notes: A great way to get all of Rat's money.
