@@ -41,7 +41,7 @@ function EndMatch()
 end
 
 function PrintTieMembers()
-	PrintChat("The following gamblers need to roll again:")
+	PrintChat("The following gamblers need to roll:")
 	local m = ""
 	for i, v in ipairs(match:GetWaitingList()) do
 		m = m..v..", "
@@ -337,9 +337,9 @@ function PayDayFrameButtonStartMatch_OnClick(self)
 	if max == nil or min == nil then return end
 	if min >= max then return end
 	PlaySoundFile("Interface\\AddOns\\PayDay\\res\\lion1.ogg", "Master")
-	match = meowth.Match:New()
 	maxRoll = max
 	minRoll = min
+	match = meowth.Match:New(maxRoll, minRoll)
 	PrintChat(string.format("Rolling from %d to %d.", min, max))
 	PrintChat("Type 1 to join or -1 to leave.")
 
@@ -428,7 +428,6 @@ end
 
 function PayDayFrameButtonReminder_OnClick(self)
 	if not matchStarted then return end
-	PrintChat('Heads up! We are waiting on:')
 	PrintTieMembers()
 end
 
