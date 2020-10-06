@@ -74,6 +74,9 @@ function PayDay_OnSlashCmd(msg, editBox)
 		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", bRoll)
 		-- combined to reduce number of messages to server otherwise I get muted
 		SELECTED_CHAT_FRAME:AddMessage(string.format("%s, %s, %s", sRoll, cRoll, bRoll))
+	elseif msg == "version" then
+		local version = GetAddOnMetadata("PayDay", "version")
+		SELECTED_CHAT_FRAME:AddMessage(string.format("PayDay version %s", version))
 	else
 		PayDayFrame:Show()
 	end
