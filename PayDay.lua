@@ -243,6 +243,8 @@ end
 -- PayDayFrame
 
 function PayDayFrame_OnLoad(self)
+	PayDayFrame:RegisterEvent("ADDON_LOADED")
+	PayDayFrame:RegisterEvent("PLAYER_LOGOUT")
 	UIDropDownMenu_Initialize(PayDayFrameDropDownChannel, PayDayFrameDropDownChannel_Initialize)
 	UIDropDownMenu_SetWidth(70, PayDayFrameDropDownChannel)
 	UIDropDownMenu_SetSelectedID(PayDayFrameDropDownChannel, channelId);
@@ -268,6 +270,23 @@ function PayDayFrame_OnUpdate(self)
 end
 
 function PayDayFrame_OnEvent(self, event, ...)
+	if event == "ADDON_LOADED" then
+		arg1 = ...
+		if arg1 == "PayDay" then  -- Is it for the PayDay AddOn?
+			if not PayDaySettings then
+				PayDaySettings = {
+					minimapPos = 10
+				}
+			else
+				minimapPos = PayDaySettings.minimapPos
+				PayDayButtonMinimap_UpdatePosition(PayDayButtonMinimap)
+				PayDayButtonMinimap_SetPosition(minimapPos)
+				PayDayButtonMinimap_UpdatePosition(PayDayButtonMinimap)
+			end
+		end
+	elseif event == "PLAYER_LOGOUT" then
+		PayDaySettings.minimapPos = minimapPos
+	end
 	if not matchStarted then return end
 	if event == "CHAT_MSG_SAY" and channelId == 1 then
 		local msg, _, _, _, name = ...
