@@ -32,6 +32,7 @@ function EndMatch()
 	PayDayFrame:UnregisterEvent("CHAT_MSG_SAY")
 	PayDayFrame:UnregisterEvent("CHAT_MSG_PARTY")
 	PayDayFrame:UnregisterEvent("CHAT_MSG_RAID")
+	PayDayFrame:UnregisterEvent("CHAT_MSG_RAID_LEADER")
 	PayDayFrame:UnregisterEvent("CHAT_MSG_SYSTEM")  -- this is where rolls come in
 	PayDayFrameButtonStartRoll:Disable()
 	PayDayFrameButtonEndMatch:Disable()
@@ -271,7 +272,7 @@ function PayDayFrame_OnEvent(self, event, ...)
 	elseif event == "CHAT_MSG_PARTY" and channelId == 2 then
 		local msg, _, _, _, name = ...
 		PayDay_ParseChat(name, msg)
-	elseif event == "CHAT_MSG_RAID" and channelId == 3 then
+	elseif event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" and channelId == 3 then
 		local msg, _, _, _, name = ...
 		PayDay_ParseChat(name, msg)
 	elseif event == "CHAT_MSG_SYSTEM" then
@@ -349,6 +350,7 @@ function PayDayFrameButtonStartMatch_OnClick(self)
 		PayDayFrame:RegisterEvent("CHAT_MSG_PARTY")
 	elseif channelId == 3 then
 		PayDayFrame:RegisterEvent("CHAT_MSG_RAID")
+		PayDayFrame:RegisterEvent("CHAT_MSG_RAID_LEADER")
 	else
 		return
 	end
