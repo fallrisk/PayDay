@@ -272,7 +272,7 @@ function PayDayFrame_OnEvent(self, event, ...)
 	elseif event == "CHAT_MSG_PARTY" and channelId == 2 then
 		local msg, _, _, _, name = ...
 		PayDay_ParseChat(name, msg)
-	elseif event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" and channelId == 3 then
+	elseif (event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER") and channelId == 3 then
 		local msg, _, _, _, name = ...
 		PayDay_ParseChat(name, msg)
 	elseif event == "CHAT_MSG_SYSTEM" then
