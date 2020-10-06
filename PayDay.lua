@@ -389,7 +389,6 @@ function PayDayFrameButtonPrintStats_OnClick(self, button, down)
 		local topAndBottom = 3
 		local top = 0
 		local bot = 0
-		PrintChat("Statistics")
 		if topAndBottom == -1 then
 			for i, v in ipairs(stats:GetGamblersSorted()) do
 				PrintChat(string.format("%s %d", v, stats.totals[v]))
