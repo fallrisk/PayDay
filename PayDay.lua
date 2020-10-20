@@ -58,22 +58,25 @@ function PayDay_OnLoad()
 end
 
 function PayDay_OnSlashCmd(msg, editBox)
+	local debugGamblers = {"Cartman", "Stan", "Kyle", "Kenny", "Randy", "Sharon", "Butters"}
 	if msg == "dj" then  -- debug join
-		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Squirtle")
-		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Charmander")
-		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, "Bulbasaur")
-		SELECTED_CHAT_FRAME:AddMessage("Squirtle, Charmander, and Bulbasaur joined the match")
+		local outStr = ""
+		for i, v in ipairs(debugGamblers) do
+			PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SAY", "1", 0, 0, 0, v)
+			outStr = string.format("%s %s,", outStr, v)
+		end
+		outStr = string.sub(outStr, 1, string.len(outStr) - 1)  -- Drop the extra comma.
+		SELECTED_CHAT_FRAME:AddMessage(string.format("%s joined the match", outStr))
 	elseif msg == "dr" then  -- debug roll
-		local sRoll = string.format("Squirtle rolls %d (%d-%d)", random(minRoll, maxRoll), minRoll, maxRoll)
-		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", sRoll)
-
-		local cRoll = string.format("Charmander rolls %d (%d-%d)", random(minRoll, maxRoll), minRoll, maxRoll)
-		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", cRoll)
-
-		local bRoll = string.format("Bulbasaur rolls %d (%d-%d)", random(minRoll, maxRoll), minRoll, maxRoll)
-		PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", bRoll)
+		local outStr = ""
+		for i, v in ipairs(debugGamblers) do
+			local roll = string.format("%s rolls %d (%d-%d)", v, random(minRoll, maxRoll), minRoll, maxRoll)
+			outStr = string.format("%s %s, ", outStr, roll)
+			PayDayFrame_OnEvent(PayDayFrame, "CHAT_MSG_SYSTEM", roll)
+		end
+		outStr = string.sub(outStr, 1, string.len(outStr) - 1)  -- Drop the extra comma.
 		-- combined to reduce number of messages to server otherwise I get muted
-		SELECTED_CHAT_FRAME:AddMessage(string.format("%s, %s, %s", sRoll, cRoll, bRoll))
+		SELECTED_CHAT_FRAME:AddMessage(outStr)
 	elseif msg == "version" then
 		local version = GetAddOnMetadata("PayDay", "version")
 		SELECTED_CHAT_FRAME:AddMessage(string.format("PayDay version %s", version))
@@ -389,24 +392,27 @@ function PayDayFrameButtonPrintStats_OnClick(self, button, down)
 		local topAndBottom = 3
 		local top = 0
 		local bot = 0
+		local outputStr = ""
 		if topAndBottom == -1 then
 			for i, v in ipairs(stats:GetGamblersSorted()) do
-				PrintChat(string.format("%s %d", v, stats.totals[v]))
+				outputStr = outputStr..(string.format(" %s %d;", v, stats.totals[v]))
 			end
 		else
 			for i, v in ipairs(stats:GetGamblersSorted()) do
 				if top < topAndBottom then
 					top = top + 1
-					PrintChat(string.format("%s %d", v, stats.totals[v]))
+					outputStr = outputStr..(string.format(" %s %d;", v, stats.totals[v]))
 				elseif top == topAndBottom and bot == 0 and count > 2 * topAndBottom then
-					PrintChat("...")
+					outputStr = outputStr.." ... "
 					top = top + 1
 				elseif top >= topAndBottom and bot < topAndBottom and i > count - topAndBottom then
 					bot = bot + 1
-					PrintChat(string.format("%s %d", v, stats.totals[v]))
+					outputStr = outputStr..(string.format(" %s %d;", v, stats.totals[v]))
 				end
 			end
 		end
+		-- Drop the last semicolon and print the statistics.
+		PrintChat(string.sub(outputStr, 1, string.len(outputStr) - 1))
 	else
 		local menu = {
 			{text = "Select a Gambler", isTitle = true}

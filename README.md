@@ -16,7 +16,9 @@ to the image. Thank you JedFlah.
 
 Go to the [releases](https://github.com/fallrisk/PayDay/releases) page and
 choose the release you want (usually you want latest). Then under assets click
-**"Source code (zip)"**. Extract the file to your AddOns directory.
+**"Source code (zip)"**. Extract the file to your AddOns directory. You have
+to rename your directory to "PayDay" if it has a name like
+"PayDay-2020.1-beta3".
 
 # Usage
 
