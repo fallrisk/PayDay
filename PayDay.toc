@@ -2,7 +2,7 @@
 ## Title: Pay Day
 ## Author: Justin Watson
 ## LoadOnDemand: 1
-## Version: 2020.1-beta4
+## Version: 2021.1-beta4
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: PayDaySettings

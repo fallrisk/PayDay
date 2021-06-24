@@ -12,11 +12,13 @@ local maxRoll = false
 local minRoll = false
 local channelId = 2
 local minimapPos = 10
+local messages = {}
+local iFrame = {}  -- interface frame, the frame in Interface/AddOns
 
 -- PayDay AddOn
 
 function PrintChat(msg)
-	local header = "[PD] "
+	local header = messages.header.text
 	if channelId == 1 then
 		SendChatMessage(header..msg, "SAY", nil, GetChannelName("SAY"))
 	elseif channelId == 2 then
@@ -42,7 +44,7 @@ function EndMatch()
 end
 
 function PrintTieMembers()
-	PrintChat("The following gamblers need to roll:")
+	PrintChat(messages.askToRoll.text)
 	local m = ""
 	for i, v in ipairs(match:GetWaitingList()) do
 		m = m..v..", "
@@ -121,36 +123,36 @@ function PayDay_CheckComplete(prevPhase, prevWaitCount)
 	end
 	if prevPhase == "roll" then
 		if match.phase == "high tie" then
-			PrintChat("There is a high tie!")
+			PrintChat(messages.onHighTie.text)
 			PrintTieMembers()
 		elseif match.phase == "low tie" then
-			PrintChat("There is a low tie!")
+			PrintChat(messages.onLowTie.text)
 			PrintTieMembers()
 		elseif match.phase == "all match" then
-			PrintChat("We got ourselves a standoff, ffs. Everybody roll again.")
+			PrintChat(messages.onStandoff.text)
 			match:Reroll()
 		end
 	elseif prevPhase == "high tie" and match.phase ~= "complete"
 		   and prevWaitCount - 1 ~= #match:GetWaitingList() then
 		if match.phase == "high tie" then
-			PrintChat("We got another high tie!")
+			PrintChat(messages.on2ndHighTie.text)
 			PrintTieMembers()
 		elseif match.phase == "low tie" then
-			PrintChat("There is also a low tie!")
+			PrintChat(messages.onAlsoLowTie.text)
 			PrintTieMembers()
 		end
 	elseif prevPhase == "low tie" and match.phase ~= "complete"
 		   and prevWaitCount - 1 ~= #match:GetWaitingList() then
 		if match.phase == "low tie" then
-			PrintChat("We got another low tie!")
+			PrintChat(messages.on2ndLowTie.text)
 			PrintTieMembers()
 		end
 	end
 
 	if match.phase == "complete" then
-		PrintChat("Match complete.")
+		PrintChat(messages.onMatchComplete.text)
 		local diff = match.highRoll - match.lowRoll
-		PrintChat(string.format("HOoO MAN! %s owes %d gold to %s!", match.lowGambler, diff, match.highGambler))
+		PrintChat(string.format(messages.onMatchCompleteOwe.text, match.lowGambler, diff, match.highGambler))
 		stats:AddMatch(match)
 		EndMatch()
 	end
@@ -276,19 +278,24 @@ function PayDayFrame_OnEvent(self, event, ...)
 	if event == "ADDON_LOADED" then
 		arg1 = ...
 		if arg1 == "PayDay" then  -- Is it for the PayDay AddOn?
-			if not PayDaySettings then
+			if not PayDaySettings or PayDaySettings.settingsVersion == nil
+				or PayDaySettings.settingsVersion ~= 3 then
 				PayDaySettings = {
-					minimapPos = 10
+					settingsVersion = 2,
+					minimapPos = 10,
+					messages = PAYDAY_DEFAULT_MESSAGES
 				}
-			else
-				minimapPos = PayDaySettings.minimapPos
-				PayDayButtonMinimap_UpdatePosition(PayDayButtonMinimap)
-				PayDayButtonMinimap_SetPosition(minimapPos)
-				PayDayButtonMinimap_UpdatePosition(PayDayButtonMinimap)
 			end
+			minimapPos = PayDaySettings.minimapPos
+			messages = PayDaySettings.messages
+			PayDayButtonMinimap_UpdatePosition(PayDayButtonMinimap)
+			PayDayButtonMinimap_SetPosition(minimapPos)
+			PayDayButtonMinimap_UpdatePosition(PayDayButtonMinimap)
+			PayDayCreateMessagesFrame(messages)
 		end
 	elseif event == "PLAYER_LOGOUT" then
 		PayDaySettings.minimapPos = minimapPos
+		PayDaySettings.messages = messages
 	end
 	if not matchStarted then return end
 	if event == "CHAT_MSG_SAY" and channelId == 1 then
@@ -366,8 +373,8 @@ function PayDayFrameButtonStartMatch_OnClick(self)
 	maxRoll = max
 	minRoll = min
 	match = meowth.Match:New(maxRoll, minRoll)
-	PrintChat(string.format("Rolling from %d to %d.", min, max))
-	PrintChat("Type 1 to join or -1 to leave.")
+	PrintChat(string.format(messages.rollingToFrom.text, min, max))
+	PrintChat(messages.join.text)
 
 	if channelId == 1 then
 		PayDayFrame:RegisterEvent("CHAT_MSG_SAY")
@@ -389,7 +396,7 @@ end
 
 function PayDayFrameButtonEndMatch_OnClick(self)
 	if not matchStarted then return end
-	PrintChat("Ending this match.")
+	PrintChat(messages.onMatchEnd.text)
 	EndMatch()
 end
 
@@ -400,7 +407,7 @@ function PayDayFrameButtonStartRoll_OnClick(self)
 	PayDayFrameButtonStartRoll:Disable()
 	PayDayFrameButtonReminder:Enable()
 	PayDayFrameButtonLastCall:Disable()
-	PrintChat(string.format("We rollin (%d to %d)!", minRoll, maxRoll))
+	PrintChat(string.format(messages.onStartRoll.text, minRoll, maxRoll))
 end
 
 function PayDayFrameButtonPrintStats_OnClick(self, button, down)
@@ -442,7 +449,7 @@ function PayDayFrameButtonPrintStats_OnClick(self, button, down)
 			end
 			})
 		end
-		local menuFrame = CreateFrame("Frame", "GamberStatsSelectFrame", UIParent, "UIDropDownMenuTemplate")
+		local menuFrame = CreateFrame("Frame", "GamblerStatsSelectFrame", UIParent, "UIDropDownMenuTemplate")
 		EasyMenu(menu, menuFrame, "cursor", 0 , 0, "MENU")
 	end
 end
@@ -463,7 +470,27 @@ end
 function PayDayFrameButtonLastCall_OnClick(self)
 	if not matchStarted then return end
 	if match.phase ~= "join" then return end
-	PrintChat("Last call to join honkies.")
+	PrintChat(messages.onLastCall.text)
+end
+
+-- PayDayInterfaceOptions
+
+function PayDayInterfaceOptions_OnLoad(panel)
+	panel.name = "Pay Day"
+	InterfaceOptions_AddCategory(panel)
+end
+
+function ScrollFrameTest_OnLoad(panel)
+	panel.name = "Scroll"
+	panel.parent = "Pay Day"
+	InterfaceOptions_AddCategory(panel)
+end
+
+function PayDayInterfaceOptionsMessagesParent_OnLoad(panel)
+	-- Need to make it so that panel.okay callback will apply the changes and cancel will just drop the changes
+	panel.name = "Messages"
+	panel.parent = "Pay Day"
+	InterfaceOptions_AddCategory(panel)
 end
 
 SlashCmdList["PAYDAY"] = PayDay_OnSlashCmd
